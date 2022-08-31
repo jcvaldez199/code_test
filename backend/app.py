@@ -3,11 +3,14 @@ from flask import (
     Flask,  g, redirect, request, url_for, jsonify, session, send_file, current_app
 )
 from sqlalchemy import (
-    create_engine, Column, Integer, String, select
+    create_engine, Column, Integer, String, select, asc
 )
 from sqlalchemy.orm import registry, Session, declarative_base
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 Base = declarative_base()
 engine = create_engine("postgresql://wang:codetest@localhost/codetest", echo=True, future=True)
 
@@ -136,11 +139,12 @@ def mail_regex(mail):
 # end of util class/funcs
 
 @app.route('/users', methods=('POST', 'GET'))
+@cross_origin()
 def user_crud():
     
     if (request.method == 'POST') and (not request.data):
         error = {"error":"No JSON Body."}
-        return jsonify(error)
+        return jsonify(error), 500
 
     if request.method == 'POST':
 
@@ -154,13 +158,13 @@ def user_crud():
         )
 
         if error:
-            return jsonify(error)
+            return jsonify(error), 500
 
         userObj  = User(**req_form)
         error = gen_query_orm(userObj)
 
         if error:
-            return jsonify(error)
+            return jsonify(error), 500
 
         return jsonify({'stat':'success'})
 
@@ -168,7 +172,7 @@ def user_crud():
         ret_list = None
         with Session(engine) as session:
             stmt = select(User)
-            ret_list = [x.serialize for x in session.scalars(select(User)).all()]
+            ret_list = [x.serialize for x in session.scalars(select(User).order_by(asc(User.userid))).all()]
         return jsonify(json_list=ret_list)
 
-    return jsonify({"error":"Invalid HTTP method."})
+    return jsonify({"error":"Invalid HTTP method."}), 500
