@@ -131,7 +131,6 @@ ins = {'mail':2343, 'name':23434, 'mode':'add'}
 x = requests.post(url,json=ins)
 print(x.text)
 
-
 ins = {'name':23434, 'mode':'edit'}
 x = requests.post(url,json=ins)
 print(x.text)

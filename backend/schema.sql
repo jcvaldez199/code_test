@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS public.user;
-
 CREATE TABLE IF NOT EXISTS public.user (
   userid SERIAL PRIMARY KEY,
   name VARCHAR NOT NULL,
